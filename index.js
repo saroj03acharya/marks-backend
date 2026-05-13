@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 
 const SHEET_ID = "1Pt1mRzmLdUkDyYTOo-5Bo9NCR8-hlebSjcY7fe0LEcM";
-const SHEET_NAME = "HA-140-143-081-82";
+const SHEET_NAME = "Sheet1";
 const API_KEY = process.env.API_KEY;
 
 app.get("/marks", async (req, res) => {
