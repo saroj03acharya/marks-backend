@@ -1,6 +1,8 @@
 import express from "express";
 import axios from "axios";
 import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -8,6 +10,7 @@ app.use(cors());
 const SHEET_ID = "1Pt1mRzmLdUkDyYTOo-5Bo9NCR8-hlebSjcY7fe0LEcM";
 const SHEET_NAME = "Sheet1";
 const API_KEY = process.env.API_KEY;
+
 
 app.get("/marks", async (req, res) => {
   try {
@@ -33,13 +36,14 @@ app.get("/marks", async (req, res) => {
     const today = new Date().toISOString().split("T")[0];
 
     const result = records.find(r =>
-      r.advertisement_no.trim() === advertisement_no.trim() &&
-      r.master_id.trim() === masterId.trim() &&
-      r.roll_number.trim() === rollNumber.trim() &&
-      r.dob.trim() === dob.trim() &&
+      r.advertisement_no?.trim() === advertisement_no?.trim() &&
+      r.master_id?.trim() === masterId?.trim() &&
+      r.roll_number?.trim() === rollNumber?.trim() &&
+      r.dob?.trim() === dob?.trim() &&
       today >= r.visible_from &&
       today <= r.visible_to
     );
+    
     if (!result) return res.json({ found: false });
 
     res.json({ found: true, data: result });
@@ -50,7 +54,6 @@ app.get("/marks", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on", PORT));
 
 
 app.get("/advertisements", async (req, res) => {
@@ -88,3 +91,6 @@ app.get("/advertisements", async (req, res) => {
     res.status(500).json({ error: "Failed to load advertisements" });
   }
 });
+
+
+app.listen(PORT, () => console.log("Server running on", PORT));
