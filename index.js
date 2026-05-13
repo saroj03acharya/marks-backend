@@ -6,12 +6,12 @@ const app = express();
 app.use(cors());
 
 const SHEET_ID = "1Pt1mRzmLdUkDyYTOo-5Bo9NCR8-hlebSjcY7fe0LEcM";
-const SHEET_NAME = "Sheet1";
+const SHEET_NAME = "HA-140-143-081-82";
 const API_KEY = process.env.API_KEY;
 
 app.get("/marks", async (req, res) => {
   try {
-    const { masterId, rollNumber, dob } = req.query;
+    const { advertisement_no, masterId, rollNumber, dob } = req.query;
 
     const url =
       `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
@@ -33,13 +33,13 @@ app.get("/marks", async (req, res) => {
     const today = new Date().toISOString().split("T")[0];
 
     const result = records.find(r =>
-      r.master_id === masterId &&
-      r.roll_number === rollNumber &&
-      r.dob === dob &&
+      r.advertisement_no.trim() === advertisement_no.trim() &&
+      r.master_id.trim() === masterId.trim() &&
+      r.roll_number.trim() === rollNumber.trim() &&
+      r.dob.trim() === dob.trim() &&
       today >= r.visible_from &&
       today <= r.visible_to
     );
-
     if (!result) return res.json({ found: false });
 
     res.json({ found: true, data: result });
@@ -51,3 +51,29 @@ app.get("/marks", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Server running on", PORT));
+
+
+app.get("/advertisements", async (req, res) => {
+  try {
+    const url =
+      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
+
+    const response = await axios.get(url);
+    const rows = response.data.values || [];
+
+    const ads = rows.slice(1).map(r => r[5]);
+
+    // unique + remove empty
+    const uniqueAds = [...new Set(ads)].filter(a => a && a.trim() !== "");
+
+    // return simple format
+    const result = uniqueAds.map(ad => ({
+      advertisement_no: ad
+    }));
+
+    res.json(result);
+
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load advertisements" });
+  }
+});
