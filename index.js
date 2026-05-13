@@ -61,12 +61,23 @@ app.get("/advertisements", async (req, res) => {
     const response = await axios.get(url);
     const rows = response.data.values || [];
 
-    const ads = rows.slice(1).map(r => r[5]);
+    const today = new Date().toISOString().split("T")[0];
 
-    // unique + remove empty
-    const uniqueAds = [...new Set(ads)].filter(a => a && a.trim() !== "");
+    const records = rows.slice(1).map(r => ({
+      advertisement_no: r[5],
+      visible_from: r[6],
+      visible_to: r[7]
+    }));
 
-    // return simple format
+    const activeAds = records.filter(r =>
+      today >= r.visible_from && today <= r.visible_to
+    );
+
+    // unique
+    const uniqueAds = [
+      ...new Set(activeAds.map(r => r.advertisement_no))
+    ];
+
     const result = uniqueAds.map(ad => ({
       advertisement_no: ad
     }));
